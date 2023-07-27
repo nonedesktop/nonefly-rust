@@ -1,0 +1,12 @@
+[package]
+name = "nonefly-rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.72"
+axum = "0.6.19"
+serde = { version = "1.0.176", features = ["serde_derive"] }
+serde_json = "1.0.104"
+sqlx = { version = "0.7.1", features = ["runtime-tokio", "sqlite"] }
+tokio = { version = "1.29.1", features = ["macros", "rt-multi-thread"] }
