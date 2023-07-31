@@ -18,9 +18,11 @@ pub async fn save_instance(pool: &SqlitePool, name: &String, instance: &Instance
 }
 
 pub async fn load_instance(pool: &SqlitePool, id: &i64) -> Result<Option<Instance>> {
-    Ok(
-        query!(r#"SELECT instance_json AS "instance_json: Json<Instance>" FROM instance WHERE id = $1"#, id)
-            .fetch_optional(pool)
-            .await?.map(|result| result.instance_json.0)
+    Ok(query!(
+        r#"SELECT instance_json AS "instance_json: Json<Instance>" FROM instance WHERE id = $1"#,
+        id,
     )
+    .fetch_optional(pool)
+    .await?
+    .map(|result| result.instance_json.0))
 }
