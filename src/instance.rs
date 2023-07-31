@@ -35,3 +35,23 @@ impl Instance {
             .success())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::Instance;
+
+    use std::path::Path;
+
+    #[test]
+    fn create_instance() {
+        let instance = Instance::new(
+            "test-instance".to_string(),
+            "touch".to_string(),
+            vec!["RUNNING".to_string()],
+        )
+        .unwrap();
+        let _ = instance.start();
+
+        assert!(Path::new("test-instance").exists());
+    }
+}

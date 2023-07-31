@@ -3,3 +3,5 @@
 nonefly.db
 nonefly.db-shm
 nonefly.db-wal
+
+/test-instance/
