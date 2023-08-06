@@ -26,8 +26,6 @@ impl Instance {
     }
 
     pub fn start(&self) -> Result<bool> {
-        std::fs::create_dir_all(&self.working_directory)?;
-
         Ok(Command::new(&self.starting_command)
             .args(&self.starting_command_arguments)
             .current_dir(&self.working_directory)
