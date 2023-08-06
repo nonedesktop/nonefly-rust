@@ -1,5 +1,7 @@
 use std::process::Command;
 
+use std::io::Write;
+
 use anyhow::Result;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug)]
@@ -30,17 +32,25 @@ impl Instance {
             .args(vec!["-m", "venv", "env"])
             .current_dir(&self.working_directory)
             .status()?
-            .success() {
+            .success()
+        {
             anyhow::bail!("Failed to create virtual environment")
         }
 
         if !Command::new("sh")
-            .args(vec!["-c", ". env/bin/activate && pip install nonebot2[fastapi]"])
+            .args(vec![
+                "-c",
+                ". env/bin/activate && pip install nonebot2[fastapi]",
+            ])
             .current_dir(&self.working_directory)
             .status()?
-            .success() {
+            .success()
+        {
             anyhow::bail!("Failed to install NoneBot 2")
         }
+
+        std::fs::File::create(&format!("{}/bot.py", self.working_directory))?
+            .write_all(include_bytes!("bot.py"))?;
 
         Ok(())
     }
@@ -70,5 +80,6 @@ mod tests {
         .unwrap();
         instance.create().unwrap();
         assert!(Path::new("test-instance").exists());
+        assert!(Path::new("test-instance/bot.py").exists());
     }
 }
