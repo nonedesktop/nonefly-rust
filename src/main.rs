@@ -61,6 +61,7 @@ async fn create_instance_handler(
         input.starting_command,
         input.starting_command_arguments,
     )?;
+    instance.create()?;
 
     Ok(Json(
         storage::save_instance(&state.sqlite_pool, &input.name, &instance).await?,

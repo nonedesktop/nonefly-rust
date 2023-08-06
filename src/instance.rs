@@ -16,13 +16,33 @@ impl Instance {
         starting_command: String,
         starting_command_arguments: Vec<String>,
     ) -> Result<Self> {
-        std::fs::create_dir_all(&working_directory)?;
-
         Ok(Self {
             working_directory,
             starting_command,
             starting_command_arguments,
         })
+    }
+
+    pub fn create(&self) -> Result<()> {
+        std::fs::create_dir_all(&self.working_directory)?;
+
+        if !Command::new("python")
+            .args(vec!["-m", "venv", "env"])
+            .current_dir(&self.working_directory)
+            .status()?
+            .success() {
+            anyhow::bail!("Failed to create virtual environment")
+        }
+
+        if !Command::new("sh")
+            .args(vec!["-c", ". env/bin/activate && pip install nonebot2[fastapi]"])
+            .current_dir(&self.working_directory)
+            .status()?
+            .success() {
+            anyhow::bail!("Failed to install NoneBot 2")
+        }
+
+        Ok(())
     }
 
     pub fn start(&self) -> Result<bool> {
@@ -48,8 +68,7 @@ mod tests {
             vec!["RUNNING".to_string()],
         )
         .unwrap();
-        let _ = instance.start();
-
+        instance.create().unwrap();
         assert!(Path::new("test-instance").exists());
     }
 }
