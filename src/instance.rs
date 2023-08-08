@@ -39,7 +39,7 @@ impl Instance {
             anyhow::bail!("Failed to install NoneBot 2")
         }
 
-        std::fs::File::create(&format!("{}/bot.py", self.working_directory))?
+        std::fs::File::create(format!("{}/bot.py", self.working_directory))?
             .write_all(include_bytes!("bot.py"))?;
 
         Ok(())
@@ -52,7 +52,7 @@ impl Instance {
             .spawn()?;
         tokio::spawn(async move {
             loop {
-                if child.try_wait().unwrap() == None {
+                if child.try_wait().unwrap().is_none() {
                     tokio::task::yield_now().await;
                 }
             }
