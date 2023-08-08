@@ -8,21 +8,11 @@ use anyhow::Result;
 #[serde(rename_all = "camelCase")]
 pub struct Instance {
     working_directory: String,
-    starting_command: String,
-    starting_command_arguments: Vec<String>,
 }
 
 impl Instance {
-    pub fn new(
-        working_directory: String,
-        starting_command: String,
-        starting_command_arguments: Vec<String>,
-    ) -> Result<Self> {
-        Ok(Self {
-            working_directory,
-            starting_command,
-            starting_command_arguments,
-        })
+    pub fn new(working_directory: String) -> Result<Self> {
+        Ok(Self { working_directory })
     }
 
     pub fn create(&self) -> Result<()> {
@@ -56,8 +46,8 @@ impl Instance {
     }
 
     pub fn start(&self) -> Result<bool> {
-        Ok(Command::new(&self.starting_command)
-            .args(&self.starting_command_arguments)
+        Ok(Command::new("sh")
+            .args(vec!["-c", ". env/bin/activate && python bot.py"])
             .current_dir(&self.working_directory)
             .status()?
             .success())
@@ -72,12 +62,7 @@ mod tests {
 
     #[test]
     fn create_instance() {
-        let instance = Instance::new(
-            "test-instance".to_string(),
-            "touch".to_string(),
-            vec!["RUNNING".to_string()],
-        )
-        .unwrap();
+        let instance = Instance::new("test-instance".to_string()).unwrap();
         instance.create().unwrap();
         assert!(Path::new("test-instance").exists());
         assert!(Path::new("test-instance/bot.py").exists());

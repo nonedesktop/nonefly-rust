@@ -48,19 +48,13 @@ where
 struct CreateInstanceInput {
     name: String,
     working_directory: String,
-    starting_command: String,
-    starting_command_arguments: Vec<String>,
 }
 
 async fn create_instance_handler(
     State(state): State<AppState>,
     extract::Json(input): extract::Json<CreateInstanceInput>,
 ) -> Result<Json<i64>, Error> {
-    let instance = Instance::new(
-        input.working_directory,
-        input.starting_command,
-        input.starting_command_arguments,
-    )?;
+    let instance = Instance::new(input.working_directory)?;
     instance.create()?;
 
     Ok(Json(
