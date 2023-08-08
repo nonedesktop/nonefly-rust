@@ -71,14 +71,14 @@ struct StartInstanceInput {
 async fn start_instance_handler(
     State(state): State<AppState>,
     extract::Json(input): extract::Json<StartInstanceInput>,
-) -> Result<Json<bool>, Error> {
+) -> Result<(), Error> {
     let instance = storage::load_instance(&state.sqlite_pool, &input.id).await?;
     if instance.is_none() {
         return Err(anyhow::anyhow!("Instance does not exist").into());
     }
     let instance = instance.unwrap();
 
-    Ok(Json(instance.start()?))
+    Ok(instance.start().await?)
 }
 
 async fn guard_sqlite_pool() -> anyhow::Result<SqlitePool> {
