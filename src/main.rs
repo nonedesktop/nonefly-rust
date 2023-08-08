@@ -78,7 +78,7 @@ async fn start_instance_handler(
     }
     let instance = instance.unwrap();
 
-    Ok(instance.start().await?)
+    Ok(instance.start()?)
 }
 
 async fn guard_sqlite_pool() -> anyhow::Result<SqlitePool> {

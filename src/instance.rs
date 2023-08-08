@@ -45,17 +45,13 @@ impl Instance {
         Ok(())
     }
 
-    pub async fn start(&self) -> Result<()> {
+    pub fn start(&self) -> Result<()> {
         let mut child = Command::new("sh")
             .args(vec!["-c", ". env/bin/activate && python bot.py"])
             .current_dir(&self.working_directory)
             .spawn()?;
-        tokio::spawn(async move {
-            loop {
-                if child.try_wait().unwrap().is_none() {
-                    tokio::task::yield_now().await;
-                }
-            }
+        std::thread::spawn(move || {
+            child.wait().unwrap();
         });
 
         Ok(())
