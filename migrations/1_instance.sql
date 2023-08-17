@@ -7,3 +7,11 @@ CREATE TABLE instance (
 
 	UNIQUE (name)
 );
+
+CREATE TABLE adapter (
+	python_package_name TEXT NOT NULL,
+	module_name TEXT NOT NULL,
+	data_json TEXT NOT NULL,
+
+	PRIMARY KEY (python_package_name, module_name)
+);

@@ -1,4 +1,5 @@
 mod instance;
+mod nonebot;
 mod storage;
 
 use instance::Instance;
@@ -7,7 +8,7 @@ use axum::{
     extract::{self, State},
     http::StatusCode,
     response::{IntoResponse, Response},
-    routing::post,
+    routing::{get, post},
     Json,
 };
 
@@ -41,6 +42,12 @@ where
     fn from(error: E) -> Self {
         Self(error.into())
     }
+}
+
+async fn update_adapter_index_handler(State(state): State<AppState>) -> Result<(), Error> {
+    nonebot::update_adapter_index(&state.sqlite_pool).await?;
+
+    Ok(())
 }
 
 #[derive(Deserialize)]
@@ -99,6 +106,7 @@ async fn main() {
     };
 
     let router = axum::Router::new()
+        .route("/update-adapter-index", get(update_adapter_index_handler))
         .route("/instance/create", post(create_instance_handler))
         .route("/instance/start", post(start_instance_handler))
         .with_state(state);
