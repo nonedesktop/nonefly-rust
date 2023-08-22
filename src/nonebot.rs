@@ -33,3 +33,7 @@ pub async fn update_adapter_index(pool: &SqlitePool) -> Result<()> {
 
     Ok(())
 }
+
+pub async fn get_adapters(pool: &SqlitePool) -> Result<Vec<String>> {
+    storage::load_adapters(pool).await
+}

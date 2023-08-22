@@ -46,3 +46,12 @@ pub async fn save_adapters(pool: &SqlitePool, adapters: &Vec<Adapter>) -> Result
 
     Ok(())
 }
+
+pub async fn load_adapters(pool: &SqlitePool) -> Result<Vec<String>> {
+    Ok(query!(r#"SELECT data_json FROM adapter"#)
+        .fetch_all(pool)
+        .await?
+        .into_iter()
+        .map(|result| result.data_json)
+        .collect())
+}
