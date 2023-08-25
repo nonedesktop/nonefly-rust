@@ -15,3 +15,11 @@ CREATE TABLE adapter (
 
 	PRIMARY KEY (python_package_name, module_name)
 );
+
+CREATE TABLE plugin (
+	python_package_name TEXT NOT NULL,
+	module_name TEXT NOT NULL,
+	data_json TEXT NOT NULL,
+
+	PRIMARY KEY (python_package_name, module_name)
+);

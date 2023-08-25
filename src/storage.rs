@@ -1,4 +1,7 @@
-use crate::{instance::Instance, nonebot::Adapter};
+use crate::{
+    instance::Instance,
+    nonebot::{Adapter, Plugin},
+};
 
 use sqlx::{query, types::Json, SqlitePool};
 
@@ -54,4 +57,24 @@ pub async fn load_adapters(pool: &SqlitePool) -> Result<Vec<String>> {
         .into_iter()
         .map(|result| result.data_json)
         .collect())
+}
+
+pub async fn save_plugins(pool: &SqlitePool, plugins: &Vec<Plugin>) -> Result<()> {
+    let mut transaction = pool.begin().await?;
+
+    query!(r#"DELETE FROM plugin"#)
+        .execute(&mut *transaction)
+        .await?;
+    for plugin in plugins {
+        query!(
+            r#"INSERT INTO plugin (module_name, python_package_name, data_json) VALUES ($1, $2, $3)"#,
+            plugin.module_name,
+            plugin.python_package_name,
+            plugin.data_json,
+        ).execute(&mut *transaction).await?;
+    }
+
+    transaction.commit().await?;
+
+    Ok(())
 }
