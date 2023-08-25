@@ -78,3 +78,12 @@ pub async fn save_plugins(pool: &SqlitePool, plugins: &Vec<Plugin>) -> Result<()
 
     Ok(())
 }
+
+pub async fn load_plugins(pool: &SqlitePool) -> Result<Vec<String>> {
+    Ok(query!(r#"SELECT data_json FROM plugin"#)
+        .fetch_all(pool)
+        .await?
+        .into_iter()
+        .map(|result| result.data_json)
+        .collect())
+}

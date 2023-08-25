@@ -64,3 +64,7 @@ pub async fn update_plugin_index(pool: &SqlitePool) -> Result<()> {
 pub async fn get_adapters(pool: &SqlitePool) -> Result<Vec<String>> {
     storage::load_adapters(pool).await
 }
+
+pub async fn get_plugins(pool: &SqlitePool) -> Result<Vec<String>> {
+    storage::load_plugins(pool).await
+}

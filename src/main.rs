@@ -60,6 +60,10 @@ async fn get_adapters_handler(State(state): State<AppState>) -> Result<Json<Vec<
     Ok(Json(nonebot::get_adapters(&state.sqlite_pool).await?))
 }
 
+async fn get_plugins_handler(State(state): State<AppState>) -> Result<Json<Vec<String>>, Error> {
+    Ok(Json(nonebot::get_plugins(&state.sqlite_pool).await?))
+}
+
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct CreateInstanceInput {
@@ -119,6 +123,7 @@ async fn main() {
         .route("/update-adapter-index", get(update_adapter_index_handler))
         .route("/update-plugin-index", get(update_plugin_index_handler))
         .route("/get-adapters", get(get_adapters_handler))
+        .route("/get-plugins", get(get_plugins_handler))
         .route("/instance/create", post(create_instance_handler))
         .route("/instance/start", post(start_instance_handler))
         .with_state(state);
