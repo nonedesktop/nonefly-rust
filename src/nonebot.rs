@@ -13,7 +13,7 @@ pub struct Adapter {
     pub python_package_name: String,
     pub module_name: String,
     #[serde(skip_deserializing)]
-    pub data_json: Option<String>,
+    pub data_json: Option<Box<RawValue>>,
 }
 
 #[derive(Deserialize)]
@@ -22,7 +22,7 @@ pub struct Plugin {
     pub python_package_name: String,
     pub module_name: String,
     #[serde(skip_deserializing)]
-    pub data_json: Option<String>,
+    pub data_json: Option<Box<RawValue>>,
 }
 
 pub async fn update_adapter_index(pool: &SqlitePool) -> Result<()> {
@@ -33,12 +33,12 @@ pub async fn update_adapter_index(pool: &SqlitePool) -> Result<()> {
         .into_iter()
         .map(|adapter_json| -> Result<_> {
             let mut adapter: Adapter = serde_json::from_str(adapter_json.get())?;
-            adapter.data_json = Some(adapter_json.get().to_string());
+            adapter.data_json = Some(adapter_json);
 
             Ok(adapter)
         })
         .collect::<Result<_>>()?;
-    storage::save_adapters(pool, &adapters).await?;
+    storage::save_adapters(pool, adapters).await?;
 
     Ok(())
 }
@@ -51,20 +51,20 @@ pub async fn update_plugin_index(pool: &SqlitePool) -> Result<()> {
         .into_iter()
         .map(|plugin_json| -> Result<_> {
             let mut plugin: Plugin = serde_json::from_str(plugin_json.get())?;
-            plugin.data_json = Some(plugin_json.get().to_string());
+            plugin.data_json = Some(plugin_json);
 
             Ok(plugin)
         })
         .collect::<Result<_>>()?;
-    storage::save_plugins(pool, &plugins).await?;
+    storage::save_plugins(pool, plugins).await?;
 
     Ok(())
 }
 
-pub async fn get_adapters(pool: &SqlitePool) -> Result<Vec<String>> {
+pub async fn get_adapters(pool: &SqlitePool) -> Result<Vec<Box<RawValue>>> {
     storage::load_adapters(pool).await
 }
 
-pub async fn get_plugins(pool: &SqlitePool) -> Result<Vec<String>> {
+pub async fn get_plugins(pool: &SqlitePool) -> Result<Vec<Box<RawValue>>> {
     storage::load_plugins(pool).await
 }

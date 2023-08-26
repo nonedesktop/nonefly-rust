@@ -5,6 +5,8 @@ use crate::{
 
 use sqlx::{query, types::Json, SqlitePool};
 
+use serde_json::value::RawValue;
+
 use anyhow::Result;
 
 pub async fn save_instance(pool: &SqlitePool, name: &String, instance: &Instance) -> Result<i64> {
@@ -30,18 +32,19 @@ pub async fn load_instance(pool: &SqlitePool, id: &i64) -> Result<Option<Instanc
     .map(|result| result.instance_json.0))
 }
 
-pub async fn save_adapters(pool: &SqlitePool, adapters: &Vec<Adapter>) -> Result<()> {
+pub async fn save_adapters(pool: &SqlitePool, adapters: Vec<Adapter>) -> Result<()> {
     let mut transaction = pool.begin().await?;
 
     query!(r#"DELETE FROM adapter"#)
         .execute(&mut *transaction)
         .await?;
     for adapter in adapters {
+        let data_json = adapter.data_json.unwrap().get().to_string();
         query!(
             r#"INSERT INTO adapter (module_name, python_package_name, data_json) VALUES ($1, $2, $3)"#,
             adapter.module_name,
             adapter.python_package_name,
-            adapter.data_json,
+            data_json,
         ).execute(&mut *transaction).await?;
     }
 
@@ -50,27 +53,28 @@ pub async fn save_adapters(pool: &SqlitePool, adapters: &Vec<Adapter>) -> Result
     Ok(())
 }
 
-pub async fn load_adapters(pool: &SqlitePool) -> Result<Vec<String>> {
-    Ok(query!(r#"SELECT data_json FROM adapter"#)
+pub async fn load_adapters(pool: &SqlitePool) -> Result<Vec<Box<RawValue>>> {
+    query!(r#"SELECT data_json FROM adapter"#)
         .fetch_all(pool)
         .await?
         .into_iter()
-        .map(|result| result.data_json)
-        .collect())
+        .map(|result| Ok(serde_json::from_str(&result.data_json)?))
+        .collect::<Result<_>>()
 }
 
-pub async fn save_plugins(pool: &SqlitePool, plugins: &Vec<Plugin>) -> Result<()> {
+pub async fn save_plugins(pool: &SqlitePool, plugins: Vec<Plugin>) -> Result<()> {
     let mut transaction = pool.begin().await?;
 
     query!(r#"DELETE FROM plugin"#)
         .execute(&mut *transaction)
         .await?;
     for plugin in plugins {
+        let data_json = plugin.data_json.unwrap().get().to_string();
         query!(
             r#"INSERT INTO plugin (module_name, python_package_name, data_json) VALUES ($1, $2, $3)"#,
             plugin.module_name,
             plugin.python_package_name,
-            plugin.data_json,
+            data_json,
         ).execute(&mut *transaction).await?;
     }
 
@@ -79,11 +83,11 @@ pub async fn save_plugins(pool: &SqlitePool, plugins: &Vec<Plugin>) -> Result<()
     Ok(())
 }
 
-pub async fn load_plugins(pool: &SqlitePool) -> Result<Vec<String>> {
-    Ok(query!(r#"SELECT data_json FROM plugin"#)
+pub async fn load_plugins(pool: &SqlitePool) -> Result<Vec<Box<RawValue>>> {
+    query!(r#"SELECT data_json FROM plugin"#)
         .fetch_all(pool)
         .await?
         .into_iter()
-        .map(|result| result.data_json)
-        .collect())
+        .map(|result| Ok(serde_json::from_str(&result.data_json)?))
+        .collect::<Result<_>>()
 }

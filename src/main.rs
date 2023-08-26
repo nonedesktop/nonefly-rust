@@ -18,6 +18,7 @@ use sqlx::{
 };
 
 use serde::Deserialize;
+use serde_json::value::RawValue;
 
 const MIGRATOR: Migrator = sqlx::migrate!();
 const DATABASE_FILENAME: &str = "nonefly.db";
@@ -56,11 +57,15 @@ async fn update_plugin_index_handler(State(state): State<AppState>) -> Result<()
     Ok(())
 }
 
-async fn get_adapters_handler(State(state): State<AppState>) -> Result<Json<Vec<String>>, Error> {
+async fn get_adapters_handler(
+    State(state): State<AppState>,
+) -> Result<Json<Vec<Box<RawValue>>>, Error> {
     Ok(Json(nonebot::get_adapters(&state.sqlite_pool).await?))
 }
 
-async fn get_plugins_handler(State(state): State<AppState>) -> Result<Json<Vec<String>>, Error> {
+async fn get_plugins_handler(
+    State(state): State<AppState>,
+) -> Result<Json<Vec<Box<RawValue>>>, Error> {
     Ok(Json(nonebot::get_plugins(&state.sqlite_pool).await?))
 }
 
