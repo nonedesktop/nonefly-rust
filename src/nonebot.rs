@@ -68,3 +68,20 @@ pub async fn get_adapters(pool: &SqlitePool) -> Result<Vec<Box<RawValue>>> {
 pub async fn get_plugins(pool: &SqlitePool) -> Result<Vec<Box<RawValue>>> {
     storage::load_plugins(pool).await
 }
+
+#[cfg(test)]
+mod tests {
+    use sqlx::SqlitePool;
+
+    #[sqlx::test]
+    async fn get_adapters(pool: SqlitePool) {
+        super::update_adapter_index(&pool).await.unwrap();
+        super::get_adapters(&pool).await.unwrap();
+    }
+
+    #[sqlx::test]
+    async fn get_plugins(pool: SqlitePool) {
+        super::update_plugin_index(&pool).await.unwrap();
+        super::get_plugins(&pool).await.unwrap();
+    }
+}
